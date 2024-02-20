@@ -1,0 +1,1 @@
+# qtec_solution_task
