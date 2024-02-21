@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import UserLoginAPIView,ProfileBlogListCreateAPIView,UserRegistrationAPIView,BlogSearchAPIView,ProfileBlogDetailAPIView,BookmarkAPIView,BlogListCreateAPIView,BlogDetailAPIView
-
+from . import views
 
 urlpatterns = [
     path('api/register/', UserRegistrationAPIView.as_view(), name='user-register'),
@@ -11,4 +11,6 @@ urlpatterns = [
     path('blogs/', BlogListCreateAPIView.as_view(), name='blog-list-create'),
     path('blogs/<int:pk>/', BlogDetailAPIView.as_view(), name='blog-detail'),
     path('bookmark/', BookmarkAPIView.as_view(), name='bookmark'),
+    path('admin/dashboard/', views.blog_dashboard, name='dashboard_data'),
+    
 ]

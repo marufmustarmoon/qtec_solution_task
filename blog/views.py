@@ -10,6 +10,10 @@ from .models import *
 from fuzzywuzzy import process
 from django.db.models import Q
 from .serializers import BlogSerializer
+from django.shortcuts import render
+from .models import Blog
+from django.db.models import Count
+
 
 class UserRegistrationAPIView(APIView):
     def post(self, request):
@@ -207,6 +211,8 @@ class BlogDetailAPIView(APIView):
         try:
             
             blog = Blog.objects.get(pk=pk)
+            blog.total_views += 1
+            blog.save()
 
         except Blog.DoesNotExist:
             return Response({"error": "Blog not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -241,3 +247,15 @@ class BookmarkAPIView(APIView):
         
         bookmark.delete()
         return Response({"message": "Bookmark removed successfully"}, status=status.HTTP_204_NO_CONTENT)
+    
+    
+
+
+def blog_dashboard(request):
+    category_data = Blog.objects.values('category').annotate(total=Count('category'))
+    categories = [entry['category'] for entry in category_data]
+    totals = [entry['total'] for entry in category_data]
+    return render(request, 'admin/blog_dashboard.html', {
+        'categories': categories,
+        'totals': totals,
+    })

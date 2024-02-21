@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Blog Dashboard{% endblock %}
+
+{% block extrahead %}
+<!-- Bootstrap CDN for styling (if not already included in your project) -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<!-- Chart.js CDN for the pie chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1>Blog Dashboard</h1>
+    <div class="row">
+        <div class="col-md-6">
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+// Prepare the data for the pie chart
+var ctx = document.getElementById('categoryChart').getContext('2d');
+var categoryChart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: {{ categories|safe }},
+        datasets: [{
+            label: 'Blog Categories',
+            data: {{ totals|safe }},
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        legend: {
+            position: 'bottom',
+        },
+        title: {
+            display: true,
+            text: 'Blog Categories Distribution'
+        }
+    }
+});
+</script>
+{% endblock %}
