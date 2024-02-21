@@ -8,25 +8,34 @@ from .models import Blog,User,Bookmark
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
-    user_type = serializers.ChoiceField(choices=[('author', 'Author'), ('normal', 'Normal User')])
 
     def validate(self, data):
         username = data.get('username')
         password = data.get('password')
-        user_type = data.get('user_type')
 
         if not username or not password:
             raise serializers.ValidationError({'detail': 'Username and password are required'})
-
 
         return data
     
     
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    isAuthor = serializers.BooleanField(write_only=True)
+
     class Meta:
         model = User
-        fields = ['username', 'password','user_type']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['username', 'password', 'isAuthor']
+
+    def create(self, validated_data):
+        isAuthor = validated_data.pop('isAuthor', False)
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+        )
+        user.isAuthor = isAuthor
+        user.save()
+        return user
     
     
 

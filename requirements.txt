@@ -5,4 +5,5 @@ django-redis==5.4.0,
 PyJWT==2.8.0,
 djangorestframework==3.14.0,
 fuzzywuzzy==0.18.0,
-Levenshtein==0.25.0
+Levenshtein==0.25.0,
+django_silk==5.1.0

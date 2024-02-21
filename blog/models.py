@@ -4,13 +4,14 @@ from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from PIL import Image
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+
 
 
 class User(AbstractUser):
-    USER_TYPE_CHOICES = [
-        ('normal', 'Normal User'),
-        ('author', 'Author'),
-    ]
     isAuthor = models.BooleanField(default=False)
     groups = models.ManyToManyField(Group, related_name='customuser_set')
     user_permissions = models.ManyToManyField(Permission, related_name='customuser_set')
@@ -24,8 +25,7 @@ class Blog(models.Model):
     banner = models.ImageField(upload_to='blog_banners/')
     details = models.TextField()
     total_views = models.PositiveIntegerField(default=0)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    bookmarked = models.BooleanField(default=False)
+    author = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -42,22 +42,33 @@ class Blog(models.Model):
             img = Image.open(self.banner.path)
             if img.mode != 'RGB':
                 img = img.convert('RGB')
-            img.thumbnail((800, 600))  # Adjust dimensions as needed
+            img.thumbnail((800, 600))  
             img.save(self.banner.path)
         
-        # Update search_vector
-        self.search_vector = SearchVector('title', 'details')
+        
+    def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        if self.title:  
+            self.update_search_vector()
 
+    def update_search_vector(self):
+        self.search_vector = SearchVector('title')
+        Blog.objects.filter(pk=self.pk).update(search_vector=self.search_vector)
+        
     @staticmethod
     def search(query):
         search_query = SearchQuery(query)
-        # Filter blogs based on search query and rank results
         results = Blog.objects.annotate(rank=SearchRank(Blog.search_vector, search_query)).filter(rank__gte=0.3).order_by('-rank')
         return results
     
+@receiver(post_save, sender=Blog)
+def update_search_vector(sender, instance, created, **kwargs):
+    if created:
+        instance.update_search_vector()
+    
 
 class Bookmark(models.Model):
-    blog = models.ForeignKey('Blog', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 

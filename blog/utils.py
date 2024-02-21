@@ -15,10 +15,10 @@ JWT_EXPIRE_DATE = os.environ.get("JWT_EXPIRE_DATE", 30)
 
 
 
-def generate_access_token(username,user_type, secret=JWT_SECRET, expiration_days=JWT_EXPIRE_DATE):
+def generate_access_token(username,isAuthor, secret=JWT_SECRET, expiration_days=JWT_EXPIRE_DATE):
     payload = {
         "username": username,
-        "user_type":user_type,
+        "isAuthor":isAuthor,
         "exp": datetime.datetime.utcnow()
         + datetime.timedelta(days=int(expiration_days)),
         "iat": datetime.datetime.utcnow(),
@@ -62,9 +62,9 @@ def verify_access_token_decorator(func):
         kwargs["is_valid"] = is_valid
         kwargs["decoded_payload"] = decoded_payload
         username=decoded_payload["username"]
-        user_type= decoded_payload["user_type"]
+        isAuthor= decoded_payload["isAuthor"]
         kwargs["username"] = username
-        kwargs["user_type"] = user_type
+        kwargs["isAuthor"] = isAuthor
 
         return func(*args, **kwargs)
 
