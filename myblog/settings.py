@@ -96,9 +96,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get("DB_NAME", "qtec_solution"),
-        'USER': os.environ.get("DB_USER", "postgres"),
-        'PASSWORD': os.environ.get("DB_PASSWORD","qtec_solution"),
-        'HOST': os.environ.get("DB_HOST","localhost"),
+        'USER': os.environ.get("DB_USER", "qtec_solution"),
+        'PASSWORD': os.environ.get("DB_PASSWORD","Ri1PdXYyQ9dfwSAOXylTYz5ATCjVW4tr"),
+        'HOST': os.environ.get("DB_HOST","dpg-cncfdh6g1b2c739hi7e0-a.singapore-postgres.render.com"),
         'PORT': '5432',
     }
 }
