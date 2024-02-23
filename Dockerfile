@@ -24,4 +24,4 @@ ENV DB_USER=postgres
 ENV DB_PASSWORD=
 
 
-CMD python manage.py migrate && gunicorn --config conf/gunicorn.conf.py core.wsgi --preload
+CMD python manage.py migrate && gunicorn --config conf/gunicorn.conf.py myblog.wsgi --preload
