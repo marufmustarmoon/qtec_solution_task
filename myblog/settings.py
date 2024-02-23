@@ -93,13 +93,17 @@ WSGI_APPLICATION = 'myblog.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'qtec_solution',
-        'USER': 'postgres',
-        'PASSWORD': 'qtec_solution',
-        'HOST': 'localhost',
+        'NAME': os.environ.get("DB_NAME", "qtec_solution"),
+        'USER': os.environ.get("DB_USER", "postgres"),
+        'PASSWORD': os.environ.get("DB_PASSWORD","qtec_solution"),
+        'HOST': os.environ.get("DB_HOST","localhost"),
         'PORT': '5432',
     }
 }
+
+LANGUAGE_CODE = 'en-us'
+
+TIME_ZONE = 'Asia/Dhaka'
 
 CACHES = {
     "default": {
