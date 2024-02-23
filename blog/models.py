@@ -20,9 +20,10 @@ class User(AbstractUser):
 
 
 class Blog(models.Model):
+   
     category = models.CharField(max_length=100, db_index=True)
     title = models.CharField(max_length=200, db_index=True)
-    banner = models.ImageField(upload_to='blog_banners/')
+    banner = models.ImageField(upload_to='blog_banners/',null=True,blank=True)
     details = models.TextField()
     total_views = models.PositiveIntegerField(default=0)
     author = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
@@ -70,5 +71,6 @@ def update_search_vector(sender, instance, created, **kwargs):
 class Bookmark(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE)
+    bookmark = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

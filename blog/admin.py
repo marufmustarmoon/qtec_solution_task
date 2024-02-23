@@ -1,12 +1,7 @@
 from django.contrib import admin
-from .models import User, Blog
+from .models import User, Blog,Bookmark
 from django.contrib import admin
-from django.urls import path
-from django.shortcuts import render
-from django.db.models import Count
-from django.core.paginator import Paginator
-from django.db.models import Q
-from .views import blog_dashboard
+
 
 # # Register your models here.
 
@@ -34,13 +29,9 @@ class BlogAdmin(admin.ModelAdmin):
     search_fields = ('title', 'category', 'author__username')
     readonly_fields = ('total_views', 'created_at', 'updated_at')
     
-    def get_urls(self):
-        urls = super().get_urls()
-        print(urls)
-        custom_urls = [
-            path('dashboard/', self.admin_site.admin_view(blog_dashboard), name='blog-dashboard'),
-            # path('list/', self.admin_site.admin_view(blog_list), name='blog-list'),
-        ]
-        print(custom_urls + urls)
-        return custom_urls + urls
 
+@admin.register(Bookmark)
+class BookmarkAdmin(admin.ModelAdmin):
+    list_display = ('user', 'blog', 'bookmark', 'created_at')
+    list_filter = ('user', 'bookmark')
+    search_fields = ('user__username', 'blog__title')

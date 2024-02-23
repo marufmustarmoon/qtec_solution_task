@@ -1,0 +1,74 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}
+    Blog List
+{% endblock %}
+
+{% block content %}
+    <div class="module">
+        <form method="GET" action=".">
+            <div>
+                <label for="id_author">Author:</label>
+                <input type="text" name="author" id="id_author" value="{{ request.GET.author }}">
+            </div>
+            <div>
+                <label for="id_category">Category:</label>
+                <select name="category" id="id_category">
+                    {% for category in categories %}
+                        <option value="{{ category }}" {% if category == request.GET.category %}selected{% endif %}>{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <input type="submit" value="Filter">
+        </form>
+    </div>
+
+    <div class="module">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Author</th>
+                    <th>Total Views</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for blog in blog_page %}
+                    <tr class="{% cycle 'row1' 'row2' %}">
+                        <td>{{ blog.title }}</td>
+                        <td>{{ blog.category }}</td>
+                        <td>{{ blog.author }}</td>
+                        <td>{{ blog.total_views }}</td>
+                        <td>{{ blog.created_at }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5">No blogs found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if blog_page.has_other_pages %}
+        <div class="pagination">
+            <span class="step-links">
+                {% if blog_page.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page={{ blog_page.previous_page_number }}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ blog_page.number }} of {{ blog_page.paginator.num_pages }}.
+                </span>
+
+                {% if blog_page.has_next %}
+                    <a href="?page={{ blog_page.next_page_number }}">next</a>
+                    <a href="?page={{ blog_page.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+{% endblock %}

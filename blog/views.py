@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserRegistrationSerializer
+# from .serializers import UserRegistrationSerializer
 from .serializers import UserLoginSerializer,BlogSerializer
 from .utils import generate_access_token,verify_access_token_decorator
 from .models import *
@@ -13,15 +13,35 @@ from .serializers import BlogSerializer
 from django.shortcuts import render
 from .models import Blog
 from django.db.models import Count
+from django.shortcuts import get_object_or_404
+
+
 
 
 class UserRegistrationAPIView(APIView):
     def post(self, request):
-        serializer = UserRegistrationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'success': True, 'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        username = request.data.get('username')
+        password = request.data.get('password')
+        is_author = request.data.get('isAuthor', False)
+        print(is_author)
+
+        # Validate username, password, and isAuthor
+        if not username:
+            return Response({'error': 'Username is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not password:
+            return Response({'error': 'Password is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(is_author, bool):
+            return Response({'error': 'isAuthor must be a boolean value.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user, created = User.objects.get_or_create(username=username)
+        if created:
+            user.set_password(password)
+        else:
+            if user.isAuthor != is_author:
+                user.isAuthor = is_author
+                user.save(update_fields=['isAuthor'])
+
+        return Response({'success': True, 'message': 'User created/updated successfully'}, status=status.HTTP_201_CREATED)
     
     
     
@@ -86,8 +106,8 @@ class ProfileBlogListCreateAPIView(APIView):
                 {"errors": [{"field": "author", "message": "Author not found"}]},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        
-        serializer = BlogSerializer(data=request.data)
+        print(request.data)
+        serializer = BlogSerializer(data=request.data,partial=True)
         if serializer.is_valid():
             serializer.save(author=author)  # Save the author in the Blog model
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -222,40 +242,95 @@ class BlogDetailAPIView(APIView):
 
 
 class BookmarkAPIView(APIView):
+    
     @verify_access_token_decorator
-    def post(self, request, *args, **kwargs):
+    def get(self, request, pk, *args, **kwargs):
         username = kwargs.get("username")
-        blog_id = request.data.get('blog_id')
+        print(username)
         try:
-            blog = Blog.objects.get(pk=blog_id)
-        except Blog.DoesNotExist:
-            return Response({"error": "Blog not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        bookmark, created = Bookmark.objects.get_or_create(user__username=username, blog=blog)
-        if created:
-            return Response({"message": "Blog bookmarked successfully"}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"message": "Blog already bookmarked"}, status=status.HTTP_200_OK)
-
-    def delete(self, request, *args, **kwargs):
-        username = kwargs.get("username")
-        blog_id = request.data.get('blog_id')
-        try:
-            bookmark = Bookmark.objects.get(user__username=username, blog_id=blog_id)
-        except Bookmark.DoesNotExist:
+            blog = get_object_or_404(Blog, pk=pk)
+            bookmark = get_object_or_404(Bookmark, user__username=username, blog=blog)
+            print(bookmark)
+            print(bookmark.bookmark)
+            return Response({"bookmark": bookmark.bookmark}, status=status.HTTP_200_OK)
+        except:
             return Response({"error": "Bookmark not found"}, status=status.HTTP_404_NOT_FOUND)
         
-        bookmark.delete()
-        return Response({"message": "Bookmark removed successfully"}, status=status.HTTP_204_NO_CONTENT)
+    @verify_access_token_decorator
+    def post(self, request, pk, *args, **kwargs):
+        username = kwargs.get("username")
+        user = User.objects.get(username=username)  # Obtain the user from the username
+        try:
+            blog = Blog.objects.get(pk=pk)
+        except Blog.DoesNotExist:
+            return Response({"error": "Blog not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+        bookmark, created = Bookmark.objects.get_or_create(user=user, blog=blog)  # Assign the user to the bookmark
+        bookmark.bookmark = not bookmark.bookmark
+        bookmark.save()
+        print(bookmark.bookmark)
+        return Response({"bookmark_status": bookmark.bookmark}, status=status.HTTP_200_OK)
+
+
+    
+    
+    
+class CheckisAuthorAPIView(APIView):
+    @verify_access_token_decorator
+    def get(self, request, *args, **kwargs):
+        isAuthor = kwargs.get("isAuthor")
+        username = kwargs.get("username")
+        if isAuthor: 
+            response_data = {   'isAuthor': True,'username':username }
+            return Response(response_data, status=status.HTTP_200_OK)
+        response_data = {'isAuthor': False,'username':username}
+        return Response(response_data, status=status.HTTP_200_OK)
+        
+        
     
     
 
 
-def blog_dashboard(request):
-    category_data = Blog.objects.values('category').annotate(total=Count('category'))
-    categories = [entry['category'] for entry in category_data]
-    totals = [entry['total'] for entry in category_data]
-    return render(request, 'admin/blog_dashboard.html', {
-        'categories': categories,
-        'totals': totals,
-    })
+# def blog_dashboard(request):
+#     category_data = Blog.objects.values('category').annotate(total=Count('category'))
+#     categories = [entry['category'] for entry in category_data]
+#     totals = [entry['total'] for entry in category_data]
+#     return render(request, 'admin/blog_dashboard.html', {
+#         'categories': categories,
+#         'totals': totals,
+#     })
+    
+    
+
+from django.shortcuts import render
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from .models import Blog
+from django.db import models
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def dashboard(request):
+    categories = Blog.objects.values('category').annotate(count=models.Count('category'))
+    total_blogs = Blog.objects.count()
+    category_data = [{'category': category['category'], 'percentage': (category['count'] / total_blogs) * 100} for category in categories]
+    print(category_data)
+    return render(request, 'admin/dashboard.html', {'category_data': category_data})
+
+@staff_member_required
+def blog_list(request):
+    blogs = Blog.objects.all()
+    categories = Blog.objects.values_list('category', flat=True).distinct()
+
+    category_filter = request.GET.get('category')
+    author_filter = request.GET.get('author')
+
+    if category_filter:
+        blogs = blogs.filter(category=category_filter)
+    if author_filter:
+        blogs = blogs.filter(author__username__icontains=author_filter)
+
+    paginator = Paginator(blogs, 10)
+    page_number = request.GET.get('page')
+    blog_page = paginator.get_page(page_number)
+
+    return render(request, 'admin/blog_list.html', {'blog_page': blog_page, 'categories': categories})

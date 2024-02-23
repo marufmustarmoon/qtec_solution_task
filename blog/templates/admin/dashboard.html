@@ -19,15 +19,27 @@
 </div>
 
 <script>
-// Prepare the data for the pie chart
+// Get the response data from the server
+var responseData = {{ category_data|safe }};
+
+// Extract category names and percentages
+var categories = responseData.map(function(item) {
+    return item.category;
+});
+
+var percentages = responseData.map(function(item) {
+    return item.percentage;
+});
+
+// Prepare data for the pie chart
 var ctx = document.getElementById('categoryChart').getContext('2d');
 var categoryChart = new Chart(ctx, {
     type: 'pie',
     data: {
-        labels: {{ categories|safe }},
+        labels: categories,
         datasets: [{
             label: 'Blog Categories',
-            data: {{ totals|safe }},
+            data: percentages,
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
