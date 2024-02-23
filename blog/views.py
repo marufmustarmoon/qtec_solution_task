@@ -14,6 +14,13 @@ from django.shortcuts import render
 from .models import Blog
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
+from django.shortcuts import render
+from django.core.paginator import Paginator
+from .models import Blog
+from django.db import models
+from django.contrib.admin.views.decorators import staff_member_required
+# from django.views.decorators.cache import cache_page
+# from django.utils.decorators import method_decorator
 
 
 
@@ -23,9 +30,7 @@ class UserRegistrationAPIView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
         is_author = request.data.get('isAuthor', False)
-        print(is_author)
 
-        # Validate username, password, and isAuthor
         if not username:
             return Response({'error': 'Username is required.'}, status=status.HTTP_400_BAD_REQUEST)
         if not password:
@@ -132,10 +137,7 @@ class BlogSearchAPIView(APIView):
        
         blogs = Blog.objects.filter(title__icontains=corrected_query)
         
-        # user_type = kwargs.get("user_type")
-        # if user_type == "author":
-        #     username = kwargs.get("username")
-        #     blogs = blogs.filter(author__username=username)
+       
 
         serializer = BlogSerializer(blogs, many=True)
         response_data = {
@@ -153,8 +155,7 @@ class ProfileBlogDetailAPIView(APIView):
             isAuthor = kwargs.get("isAuthor")
             if isAuthor:
                 blog = Blog.objects.get(author__username=username, pk=pk)
-            # else:
-            #     blog = Blog.objects.get(pk=pk)
+           
 
         except Blog.DoesNotExist:
             return Response({"error": "Blog not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -204,9 +205,11 @@ class ProfileBlogDetailAPIView(APIView):
 
 
 
-    
-    
+
+
+ 
 class BlogListCreateAPIView(APIView):
+    # @method_decorator(cache_page(60 * 15))
     @verify_access_token_decorator
     def get(self, request, *args, **kwargs):
         
@@ -231,6 +234,7 @@ class BlogDetailAPIView(APIView):
         try:
             
             blog = Blog.objects.get(pk=pk)
+            print(blog.total_views)
             blog.total_views += 1
             blog.save()
 
@@ -289,24 +293,9 @@ class CheckisAuthorAPIView(APIView):
         
     
     
-
-
-# def blog_dashboard(request):
-#     category_data = Blog.objects.values('category').annotate(total=Count('category'))
-#     categories = [entry['category'] for entry in category_data]
-#     totals = [entry['total'] for entry in category_data]
-#     return render(request, 'admin/blog_dashboard.html', {
-#         'categories': categories,
-#         'totals': totals,
-#     })
-    
     
 
-from django.shortcuts import render
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Blog
-from django.db import models
-from django.contrib.admin.views.decorators import staff_member_required
+
 
 @staff_member_required
 def dashboard(request):
