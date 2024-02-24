@@ -1,27 +1,28 @@
-# Use the official Python image as the base image
+
 FROM python:3.10-slim
 
-# Set the working directory
+
 WORKDIR /app
 
-# Copy the requirements file
+
 COPY requirements.txt .
 
-# Install the required packages
+
 RUN pip install -r requirements.txt
 
-# Copy the application code
+
 COPY . .
 
-# Expose the Gunicorn port
+
 EXPOSE 8010
 
 
 ENV DJANGO_DEBUG=False
-ENV DB_NAME=
-ENV DB_HOST=
-ENV DB_USER=postgres
-ENV DB_PASSWORD=
+ENV DB_NAME=qtec_solution
+ENV DB_HOST=dpg-cncfdh6g1b2c739hi7e0-a.singapore-postgres.render.com
+ENV DB_USER=qtec_solution
+ENV DB_PASSWORD=Ri1PdXYyQ9dfwSAOXylTYz5ATCjVW4tr
 
 
 CMD python manage.py migrate && gunicorn --config conf/gunicorn.conf.py myblog.wsgi --preload
+
