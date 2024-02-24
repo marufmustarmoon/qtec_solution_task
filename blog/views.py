@@ -20,8 +20,8 @@ from .models import Blog
 from django.db import models
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.hashers import make_password
-# from django.views.decorators.cache import cache_page
-# from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 
 
@@ -32,8 +32,8 @@ class UserRegistrationAPIView(APIView):
         password = request.data.get('password')
         is_author = request.data.get('isAuthor', False)
         if User.objects.filter(username=username).exists():
+            
             return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
-
         
         user = User.objects.create(
             username=username,
@@ -206,7 +206,7 @@ class ProfileBlogDetailAPIView(APIView):
 
  
 class BlogListCreateAPIView(APIView):
-    # @method_decorator(cache_page(60 * 15))
+    @method_decorator(cache_page(60 * 15))
     @verify_access_token_decorator
     def get(self, request, *args, **kwargs):
         
