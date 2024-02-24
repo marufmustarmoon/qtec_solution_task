@@ -19,6 +19,7 @@ from django.core.paginator import Paginator
 from .models import Blog
 from django.db import models
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.hashers import make_password
 # from django.views.decorators.cache import cache_page
 # from django.utils.decorators import method_decorator
 
@@ -30,28 +31,23 @@ class UserRegistrationAPIView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
         is_author = request.data.get('isAuthor', False)
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not username:
-            return Response({'error': 'Username is required.'}, status=status.HTTP_400_BAD_REQUEST)
-        if not password:
-            return Response({'error': 'Password is required.'}, status=status.HTTP_400_BAD_REQUEST)
-        if not isinstance(is_author, bool):
-            return Response({'error': 'isAuthor must be a boolean value.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user, created = User.objects.get_or_create(username=username)
-        if created:
-            user.set_password(password)
-        else:
-            if user.isAuthor != is_author:
-                user.isAuthor = is_author
-                user.save(update_fields=['isAuthor'])
-
-        return Response({'success': True, 'message': 'User created/updated successfully'}, status=status.HTTP_201_CREATED)
+        
+        user = User.objects.create(
+            username=username,
+            password=make_password(password),  
+            isAuthor=is_author
+        )
+        
+        return Response({"success": "User registered successfully"}, status=status.HTTP_201_CREATED)
     
     
     
 class UserLoginAPIView(APIView):
     def post(self, request):
+        print("moon")
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
@@ -59,9 +55,10 @@ class UserLoginAPIView(APIView):
 
             try:
                 user = User.objects.get(username=username)
+                print(user)
             except User.DoesNotExist:
                 user = None
-
+            print(user.check_password(password))
             if user and user.check_password(password):
                 isAuthor = user.isAuthor
                 token = generate_access_token(username, isAuthor)

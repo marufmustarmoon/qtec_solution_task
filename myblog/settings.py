@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-8$&_2e0n@@txr@n=afzcw4ecpy9c&3cesf7qy*av5mfvu7=7wr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['qtec-solution-task.onrender.com','127.0.0.1']
+ALLOWED_HOSTS = []
 
 
 
@@ -103,6 +103,17 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'qtec_solution',
+#         'USER': 'postgres',
+#         'PASSWORD': 'qtec_solution',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 
 LANGUAGE_CODE = 'en-us'
 
