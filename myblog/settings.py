@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-8$&_2e0n@@txr@n=afzcw4ecpy9c&3cesf7qy*av5mfvu7=7wr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://qtec-solution-task.onrender.com']
 
 
 
