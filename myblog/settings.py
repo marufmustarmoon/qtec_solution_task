@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-8$&_2e0n@@txr@n=afzcw4ecpy9c&3cesf7qy*av5mfvu7=7wr'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['qtec-solution-task.onrender.com','127.0.0.1','qtec-solution-task-1.onrender.com']
 
@@ -119,17 +119,25 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Dhaka'
 
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://red-cncssu6g1b2c739jofn0:6379",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         }
+#     }
+# }
+
 CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://red-cncssu6g1b2c739jofn0:6379",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',  # Use localhost
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
 }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
