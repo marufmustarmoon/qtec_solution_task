@@ -206,8 +206,9 @@ class ProfileBlogDetailAPIView(APIView):
 
  
 class BlogListCreateAPIView(APIView):
-    @method_decorator(cache_page(60 * 15))
+    
     @verify_access_token_decorator
+    # @method_decorator(cache_page(60 * 15))
     def get(self, request, *args, **kwargs):
         
         blogs = Blog.objects.all()
