@@ -20,8 +20,8 @@ from .models import Blog
 from django.db import models
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.hashers import make_password
-from django.views.decorators.cache import cache_page
-from django.utils.decorators import method_decorator
+# from django.views.decorators.cache import cache_page
+# from django.utils.decorators import method_decorator
 
 
 

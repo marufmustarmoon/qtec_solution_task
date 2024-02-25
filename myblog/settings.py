@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-8$&_2e0n@@txr@n=afzcw4ecpy9c&3cesf7qy*av5mfvu7=7wr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['qtec-solution-task.onrender.com','127.0.0.1','qtec-solution-task-1.onrender.com']
+ALLOWED_HOSTS = ['qtec-solution-task.onrender.com','127.0.0.1','qtec-solution-task-1.onrender.com','qtec-solution-task-frontend.vercel.app']
 
 
 
@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'blog',
     'silk',
     'corsheaders',
-    'django_redis',
+    # 'django_redis',
 ]
 
 MIDDLEWARE = [
@@ -51,9 +51,9 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.cache.UpdateCacheMiddleware',
+    # 'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -130,15 +130,15 @@ TIME_ZONE = 'Asia/Dhaka'
 #     }
 # }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': os.environ.get("REDIS","redis://red-cncssu6g1b2c739jofn0:6379"),  
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
-    }
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': os.environ.get("REDIS","redis://red-cncssu6g1b2c739jofn0:6379"),  
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         }
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
